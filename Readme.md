@@ -1,53 +1,39 @@
-
-With this script all transfer events for a specified token will be extracted from chain.
-
+This solution contains 3 Projects. 
 ```
- python ./scripts/eventscanner.py http://18.188.93.177:8545 0x9390D05C0643ABC62a6680f118570a3ACAB37B26
- ```
-
-It downloads all events from the chain specified in the url and shows the progress in your console like this:
-
-```
-leon@p:~/repo/manifold$ python ./scripts/eventscanner.py http://18.188.93.177:8545 0x9390D05C0643ABC62a6680f118570a3ACAB37B26
-State starting from scratch
-Scanning events from blocks 0 - 5412
-Current block: 3399 (23-09-2022), blocks in a scan batch: 10, events processed in a batch 3:  58%|█████████████████████▍               | 3140/5412 [04:11<04:03,  9.33it/s]
+FuncSignatureGenerator
+Contracts
+Manifold.Console
 ```
 
-the eventscanner.py is based on https://web3py.readthedocs.io/en/stable/examples.html?highlight=eventscanner#example-code
-
-Running the command will give you a test-state.json file containing all the transfer-events from the contract you specify. The json file is a one-liner. So format the file in a code editor. I use VS code, open  the file and use "Format Document [Ctrl + K][Ctrl + D]". Now all lines are seperated.
-
-The  beginning of the file should look like this:
-
-```
-{
-  "last_scanned_block": 5422,
-  "blocks": {
-    "18": {
-      "0x945ee57b57daeb6afbdb0ead2a1e00b18732822bb05e018275814a2af8b2b1d7": {
-        "153": {
-          "from": "0x4ef943eF35731803d8E5474960e1Dd4bDc2c5030",
-          "to": "0x4ef943eF35731803d8E5474960e1Dd4bDc2c5030",
-          "value": 1000000,
-          "timestamp": "2022-09-22T23:29:05"
-        }
-      },
-      "0xa0e07b2c72556ef5291c6f367fc3ac362f2eb3ac32f3a1ee7051faf8f364d34c": {
-        "155": {
-          "from": "0x4ef943eF35731803d8E5474960e1Dd4bDc2c5030",
-          "to": "0x734e361c35431A7B71C64186CD908DABf5D0476C",
-          "value": 1000000,
-          "timestamp": "2022-09-22T23:29:05"
-        }
-      } ....
-```
+and a scripts folder for python scripts.
 
 
-With the next command you filter out all the "to" lines:
+All code was created from scratch during the Manifold MEV bounty. More info about it can be found [here](https://medium.com/encode-club/manifold-mev-bounty-competition-launch-event-video-resources-b0a337fb3067?source=friends_link&sk=191174512f520103921444d8677060df) and a blog post about my participation can be found [here](https://www.wieisleon.nl/manifold/mev/bounty/2022/10/24/Manifold.html).
+
+# FuncSignatureGenerator
+
+The FuncSignatureGenerator is a small console app to create a 4-bytes function signature starting with zeros. 
+Change length and startText in Program.cs and run: 
 
 ```
-awk '/to/' test-state.json > tmpfile && mv tmpfile all_accounts_that_received_tokens.json
+dotnet run
 ```
 
-You now have a file called all_accounts_that_received_tokens.json. Clean up the file and remove all double addresses. 
+It would create something like:
+```
+Found 0006dd0f: smoothgranny_jvueywnmhk(uint256) in 00:00:00.0143300
+```
+
+Now you can use the function 'smoothgranny_jvueywnmhk(uint256)' in your solidity contract and save some gas.
+
+# Manifold.Console
+
+This program monitors the mempool, cq. listens for pending transactions and writes them in a channel. The sandwichrunners will pick them up and tries to front- and back run the transactions.
+
+``Manifold Console ``
+
+In docker_instructions you can find out how to run these applications in docker on linux machines.
+
+# Contracts
+
+This project contains the solidity files and generated code. Open the project in VS code and use the solidity plugin to generate your C# code. Now the deployed contracts can be consumed by the manifold console.
